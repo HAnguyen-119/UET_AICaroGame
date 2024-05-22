@@ -102,23 +102,23 @@ def isXTurn(board, size):
 def evaluate(board, size):
     for i in range(15):
             for j in range(11):
-                if (board[i, j] == board[i, j + 1] == board[i, j + 2] == board[i, j + 3] == board[i, j + 4]):
-                    return 1 if board[i, j] == 'x' else -1
+                if (board[i][j] == board[i][j + 1] == board[i][j + 2] == board[i][j + 3] == board[i][j + 4]):
+                    return 1 if board[i][j] == 'x' else -1
 
     for i in range(15):
         for j in range(11):
-            if  (board[j, i] == board[j + 1, i] == board[j + 2, i] == board[j + 3, i] == board[j + 4, i]):
+            if  (board[j][i] == board[j + 1][i] == board[j + 2][i] == board[j + 3][i] == board[j + 4][i]):
                 return 1 if board[i, j] == 'x' else -1
 
     for i in range(11):
         for j in range(11):
-            if (board[i, j] == board[i + 1, j + 1] == board[i + 2, j + 2] == board[i + 3, j + 3] == board[i + 4, j + 4]):
-                return 1 if board[i, j] == 'x' else -1
+            if (board[i][j] == board[i + 1][j + 1] == board[i + 2][j + 2] == board[i + 3][j + 3] == board[i + 4][j + 4]):
+                return 1 if board[i][j] == 'x' else -1
     
     for i in range(11):
         for j in range(11):
-            if (board[i, 15 - j] == board[i + 1, 14 - j] == board[i + 2, 13 - j] == board[i + 3, 12 - j] == board[i + 4, 11 - j]):
-                return 1 if board[i, 15 - j] == 'x' else -1
+            if (board[i][15 - j] == board[i + 1][14 - j] == board[i + 2][13 - j] == board[i + 3][12 - j] == board[i + 4][11 - j]):
+                return 1 if board[i][15 - j] == 'x' else -1
 
     return 0
 
