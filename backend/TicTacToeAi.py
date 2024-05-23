@@ -42,43 +42,54 @@ def get_move(board, size):
                         bestMoveValue = bestValue         
     return nextMove
 
-def isXTurn(board, size):
-    x, o = 0, 0
+def countX(board, size):
+    x = 0
     for i in range(size):
         for j in range(size):
             if board[i][j] == 'x': x += 1
-            elif board[i][j] == 'o': o += 1
-    return x == o            
+    return x  
+
+def countO(board, size):
+    o = 0
+    for i in range(size):
+        for j in range(size):
+            if board[i][j] == 'o': o += 1
+    return o  
+   
+def isXTurn(board, size):
+    return countX(board, size) == countO(board, size)        
     
 def evaluate(board, size):
     # Check rows
     for i in range(size):
-        for k in range(size - 5):
-            if all(board[i][j] == 'x' for j in range(k, k + 5)): return 10
-            if all(board[i][j] == 'o' for j in range(k, k + 5)): return -10
+        for j in range(size - 4):
+            if board[i][j] == board[i][j + 1] == board[i][j + 2] == board[i][j + 3] == board[i][j + 4]:
+                if board[i][j] == 'x': return 10
+                elif board[i][j] == 'o': return -10
     # Check columns
     for i in range(size):
-        for k in range(size - 5):
-            if all(board[j][i] == 'x' for j in range(k, k + 5)): return 10
-            if all(board[j][i] == 'o' for j in range(k, k + 5)): return -10
+        for j in range(size - 4):
+            if board[j][i] == board[j + 1][i] == board[j + 2][i] == board[j + 3][i] == board[j + 4][i]:
+                if board[j][i] == 'x': return 10
+                elif board[j][i] == 'o': return -10
     # Check diagonals
-    #for k in range(size - 5):
-    #    if all(board[i][i] == 'x' for i in range(k, k + 5)) or all(board[size - 1 - i][i] == 'x' for i in range(k, k + 5)): return 10
-    #   if all(board[i][i] == 'o' for i in range(k, k + 5)) or all(board[size - 1 - i][i] == 'o' for i in range(k, k + 5)): return -10
-    for j in range(size - 4):
-        for k in range(size - j - 4):
-            if all(board[i][i + j] == 'x' for i in range(k, k + 5)) or all(board[i + j][i] == 'x' for i in range(k, k + 5)): return 10
-            if all(board[i][i + j] == 'o' for i in range(k, k + 5)) or all(board[i + j][i] == 'o' for i in range(k, k + 5)): return -10
-
-    for j in range(size - 4):
-        for k in range(size - j - 4):
-            if all(board[i][size - 1 - i - j] == 'x' for i in range(k, k + 5)) or all(board[i + j][size - 1 - i] == 'x' for i in range(k, k + 5)): return 10
-            if all(board[i][size - 1 - i - j] == 'o' for i in range(k, k + 5)) or all(board[i + j][size - 1 - i] == 'o' for i in range(k, k + 5)): return -10
+    for i in range(size - 4):
+        for j in range(size - 4):
+            if (board[i][j] == board[i + 1][j + 1] == board[i + 2][j + 2] == board[i + 3][j + 3] == board[i + 4][j + 4]):
+                if board[i][j] == 'x': return 10
+                elif board[i][j] == 'o': return -10
+    
+    for i in range(size - 4):
+        for j in range(4, size):
+            if (board[i][j] == board[i + 1][j - 1] == board[i + 2][j - 2] == board[i + 3][j - 3] == board[i + 4][j - 4]):
+                if board[i][j] == 'x': return 10
+                elif board[i][j] == 'o': return -10
+            
     return 0
 
 def minimax(board, size, depth, isMaximizing, alpha, beta):
     score = evaluate(board, size)
-    if depth == size: 
+    if depth == min(countX(board, size), size): 
         return score
     if score == 10:
         return 10 - depth
@@ -119,13 +130,13 @@ board = [['o', 'o', 'o', 'o', 'x'],
          ['o', 'x', 'x', 'x', 'x'],
          ['o', 'x', 'o', 'x', 'o']]
 '''
-board = [[' ', 'x', ' ', ' ', ' ', ' ', ' '],
-         [' ', 'o', 'x', ' ', ' ', ' ', ' '],
+board = [[' ', 'x', ' ', ' ', 'o', ' ', ' '],
+         [' ', 'o', 'x', 'o', ' ', ' ', ' '],
          ['x', ' ', 'o', 'x', ' ', ' ', 'o'],
-         [' ', 'x', ' ', 'o', 'x', 'o', ' '],
-         [' ', ' ', 'x', ' ', 'o', ' ', ' '],
-         [' ', ' ', ' ', 'o', ' ', ' ', ' '],
-         [' ', ' ', 'o', ' ', 'x', ' ', ' ']]
-#print(evaluate(board, 7))
+         [' ', 'o', ' ', 'o', 'x', 'o', ' '],
+         ['o', ' ', 'x', ' ', 'o', ' ', ' '],
+         [' ', ' ', ' ', 'x', ' ', ' ', ' '],
+         [' ', ' ', 'o', ' ', ' ', ' ', ' ']]
+print(evaluate(board, 7))
 #print(get_move(board, 5))    
 
