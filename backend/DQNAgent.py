@@ -89,10 +89,14 @@ if __name__ == "__main__":
                 action = agent.act(state)
 
             #Tính điểm của action
+
+            # # # Khả năng lỗi đang ở chỗ này
+            #Mô tả lỗi: khi win rồi nhưng done vẫn là False, đi thêm 1 nước nữa mới thành True
             next_state, reward, done, _ = env.step(action)
             total_reward += reward
             agent.remember(state, action, reward, next_state, done)
             state = next_state
+            print("reward = ", reward, "done = ", done, sep=" ")
 
             #Nếu đi không hợp lệ thì không cho người chơi RANDOM đi
             if reward == -1: 
@@ -103,15 +107,15 @@ if __name__ == "__main__":
 
             #Agent's move
             env.board[x, y] = AGENT
-            print("action", action, sep=" ")
+            print("agent action: ", "(", x,", ", y, ")", sep=" ")
             env.render()
 
             #Random ra vị trí trống trên bàn cờ
             available_random_move = False
             while not available_random_move:
                 random_action = random.choice([i for i in range(action_size)])
-                print("random action: ", random_action, sep=" ")
                 a, b = divmod(random_action, 15)
+                print("random action: ", "(", a,", ", b, ")", sep=" ")
                 if env.board[a, b] == 0: #Vị trí trống mang giá trị 0
                     available_random_move = True
                     env.board[a, b] = RANDOM
@@ -125,7 +129,8 @@ if __name__ == "__main__":
                 agent.update_target_model()
                 print(f"Episode: {e+1}/{episodes}, Score: {total_reward}, Epsilon: {agent.epsilon:.2}")
                 print("X wins!") if env.evaluate() == 10 else print("O wins!")
+                break
 
             if len(agent.memory) > batch_size:
                 agent.replay(batch_size)
-    # agent._build_model.save_model("traint_agent.h5")
+    # agent._build_model.save_model("train_agent.h5")
