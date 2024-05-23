@@ -9,6 +9,10 @@ from keras.layers import Dense, Flatten
 from keras.optimizers import Adam
 from Env import TicTacToeEnv
 
+AGENT, RANDOM = 1, -1
+
+
+#Code không nên sửa
 class DQNAgent:
     def __init__(self, state_size, action_size):
         self.state_size = state_size
@@ -58,14 +62,18 @@ class DQNAgent:
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
+
+
 if __name__ == "__main__":
     env = TicTacToeEnv()
-    state_size = (15, 15)
-    action_size = 15 * 15  # 225 possible actions (15x15 board)
+    state_size = (env.size, env.size)
+    action_size = env.size * env.size
     agent = DQNAgent(state_size, action_size)
     batch_size = 32
-    episodes = 10000
 
+    episodes = 10000 #Code có thể sửa, số lần train
+
+    #Code có thể sửa
     for e in range(episodes):
         state = env.reset()
         done = False
@@ -73,37 +81,51 @@ if __name__ == "__main__":
         isFirstMove = True
 
         while not done:
+            #Lần đầu của Agent sẽ là random
             if isFirstMove:
                 action = random.choice([i for i in range(action_size)])
-                row, col = divmod(action, 15)
+                row, col = divmod(action, env.size)
             else:
                 action = agent.act(state)
+
+            #Tính điểm của action
             next_state, reward, done, _ = env.step(action)
             total_reward += reward
             agent.remember(state, action, reward, next_state, done)
             state = next_state
+
+            #Nếu đi không hợp lệ thì không cho người chơi RANDOM đi
+            if reward == -1: 
+                continue
+
+            #action mang giá trị 0 -> 224 nên cần đổi về dạng toạ độ (row, col)
             x, y = divmod(action, 15)
+
+            #Agent's move
+            env.board[x, y] = AGENT
             print("action", action, sep=" ")
-            env.board[x, y] = 1
             env.render()
 
-            available = False
-            while not available:
+            #Random ra vị trí trống trên bàn cờ
+            available_random_move = False
+            while not available_random_move:
                 random_action = random.choice([i for i in range(action_size)])
                 print("random action: ", random_action, sep=" ")
                 a, b = divmod(random_action, 15)
-                if env.board[a, b] == 0:
-                    available = True
-                    env.board[a, b] = -1
-
+                if env.board[a, b] == 0: #Vị trí trống mang giá trị 0
+                    available_random_move = True
+                    env.board[a, b] = RANDOM
+            
+            #In ra bàn cờ
             env.render()
 
+            #In ra thông số
+            #Code không nên sửa
             if done:
                 agent.update_target_model()
                 print(f"Episode: {e+1}/{episodes}, Score: {total_reward}, Epsilon: {agent.epsilon:.2}")
-                print("X wins!") if env.check_win() == 1 else print("O wins!")
+                print("X wins!") if env.evaluate() == 10 else print("O wins!")
 
             if len(agent.memory) > batch_size:
                 agent.replay(batch_size)
     # agent._build_model.save_model("traint_agent.h5")
-    env.render()
