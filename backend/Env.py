@@ -17,10 +17,16 @@ class TicTacToeEnv:
 
     def step(self, action):
         row, col = divmod(action, self.size)
+        print("row = ", row, ", col = ", col, sep=" ")
 
         #Nếu Agent đi vào nước đã có người đi rồi thì -1 điểm
         if self.board[row, col] != 0:
             return self.board.copy(), -1, False, {}   
+        
+        #out of bounds
+        if action < 0 or action > self.size * self.size:
+            print("Action is out of board!")
+            return self.board.copy(), -10, True, {}
 
          
         self.board[row, col] = self.current_player

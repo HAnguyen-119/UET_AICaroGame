@@ -85,6 +85,7 @@ if __name__ == "__main__":
             if isFirstMove:
                 action = random.choice([i for i in range(action_size)])
                 row, col = divmod(action, env.size)
+                isFirstMove = False
             else:
                 action = agent.act(state)
 
