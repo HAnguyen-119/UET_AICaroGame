@@ -16,11 +16,18 @@ class Game:
       self.RANDTAB = self.zobrist.zobrist(self.size)
       self.TRANSPOS_TAB = []
 
+   # lấy ra 3 action có điểm quality cao nhất dùng trong minimax
    def actions(self):
       res = []
+
+      # threat space search
       threat_space = []
+
+      # check các vị trí lân cận có depth là 3
       check_row = [0, self.size, -self.size]
       check_col = [-1, 0, 1]
+
+      # điểm của bảng hiện tại
       util = self.utility()
       for i in range(self.size):
          for j in range(self.size):
@@ -30,35 +37,58 @@ class Game:
                   if found:
                      break
                   for col in check_col:
+
+                     # giá trị của vị trí đó theo thang (1, size * size)
                      index = i * self.size + j
+
+                     # các vị trí góc của board thì có thể bỏ qua
                      if ((index + 1) % 15 == 0 and col == 1) or (index % 15 == 0 and col == -1):
                         continue
-                     n = index + row + col
-                     if n >= 0 and n < 225 and self.board[n // self.size][n % self.size] != ' ':
+
+                     # lưu lại vị trí để tính xem có hợp lệ hay không
+                     new_index = index + row + col
+                     if new_index >= 0 and new_index < 225 and self.board[new_index // self.size][new_index % self.size] != ' ':
                         res.append(index)
                         found = True
                         break
+      
+      # tính utility cho các điểm có Quality cao
       for index in res:
-         self.result(index, 'x')
+         # điểm của x move
+         self.temp_board_utility(index, 'x')
          x_util = self.utility()
+
+         #trả lại bảng cũ
          self.back(index)
 
-         self.result(index, 'o')
+         # điểm của o move
+         self.temp_board_utility(index, 'o')
          o_util = self.utility()
+         
+         #trả lại bảng cũ
          self.back(index)
 
+         # nếu điểm của x và o đều giống điểm của bảng tức là nước đi đó không hợp lệ, không cần thêm vào threat space
          if x_util != util or o_util != util:
             threat_space.append((index, max(abs(x_util - util), abs(o_util - util))))
+      
+      # sort theo điểm từ cao tới thấp
+      # có thể sử dụng max heap, cơ mà syntax heap của python chưa tìm hiểu
       threat_space.sort(key=lambda x: x[1], reverse=True)
-    
+
+      # lấy 3 giá trị tốt nhất 
       return [x[0] for x in threat_space[:3]] if threat_space else res[:3]
 
-   def result(self, action, player):
+   # bảng tạm thời cho nước đi tiếp theo của player
+   def temp_board_utility(self, action, player):
       self.board[action // self.size][action % self.size] = player
    
+   # trả về bảng cũ sau nước đi tạm thời
    def back(self, action):
       self.board[action // self.size][action % self.size] = ' '
 
+   # tính điểm utility
+   # cụ thể xem ở file Utility.py
    def utility(self):
       winner = self.util.calculate_winner()
       if winner != None:
@@ -68,60 +98,67 @@ class Game:
          thr, two = self.util.five_utility()
          return 500 * (two[0] - two[1]) + 2000 * (blt[0] - blt[1]) + 15000 * (brt[0] - brt[1]) + 30000 * (thr[0] - thr[1]) + 500000 * (fou[0] - fou[1]) + 20000000 * (stf[0] - stf[1])
 
+   # điều kiện dừng của minimax
    def terminal(self):
       return self.util.calculate_winner() != None or self.is_draw()
 
-
+   # minimax và alpha beta prunning, khỏi giải thích, không hiểu về đọc lại chương 1
+   # hash chỉ để lưu lại giá trị hiện tại của bàn cờ và điểm utility cũ, bỏ qua cái này và đọc thì nó giống hệt minimax trên geeksforgeeks
+   # https://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-1-introduction/
    def max_player(self, alpha, beta, depth):
       if self.terminal() or depth > 3:
          return [self.utility(), None]
       board_hash, cur_acts = self.zobrist.hash(self.board, self.size, self.RANDTAB), self.actions()
-      v = [alpha, cur_acts[0] if len(cur_acts) > 0 else 112]
+      val = [alpha, cur_acts[0] if len(cur_acts) > 0 else 112] 
       if board_hash in self.TRANSPOS_TAB:
          return [alpha, self.TRANSPOS_TAB[self.TRANSPOS_TAB.index(board_hash)]]
       
       for action in cur_acts:
-         self.result(action, 'x')
-         min_val = self.min_player(v[0], beta, depth + 1)
+         self.temp_board_utility(action, 'x')
+         min_val = self.min_player(val[0], beta, depth + 1)
          self.back(action)
          
-         if min_val[0] > v[0]:
-            v = [min_val[0], action]
-            if v[0] >= beta:
+         if min_val[0] > val[0]:
+            val = [min_val[0], action]
+            if val[0] >= beta:
                break
-      self.TRANSPOS_TAB.append(v[1])
-      return v
+      self.TRANSPOS_TAB.append(val[1])
+      return val
 
    def min_player(self, alpha, beta, depth):
       if self.terminal() or depth > 3:
          return [self.utility(), None]
       
       board_hash, cur_acts = self.zobrist.hash(self.board, self.size, self.RANDTAB), self.actions()
-      v = [beta, cur_acts[0] if len(cur_acts) > 0 else 112]
+      val = [beta, cur_acts[0] if len(cur_acts) > 0 else 112]
       if board_hash in self.TRANSPOS_TAB:
          return [beta, self.TRANSPOS_TAB[self.TRANSPOS_TAB.index(board_hash)]]
       
       for action in cur_acts:
-         self.result(action, 'o')
-         max_val = self.max_player(alpha, v[0], depth + 1)
+         self.temp_board_utility(action, 'o')
+         max_val = self.max_player(alpha, val[0], depth + 1)
          self.back(action)
-         if max_val[0] < v[0]:
-            v = [max_val[0], action]
-            if alpha >= v[0]:
+         if max_val[0] < val[0]:
+            val = [max_val[0], action]
+            if alpha >= val[0]:
                break
-      self.TRANSPOS_TAB.append(v[1])
+      self.TRANSPOS_TAB.append(val[1])
 
-      return v
+      return val
    
-   def move(self, player):
+   # tạo nước đi, dùng min player hay max player cũng được
+   def move(self):
       return self.min_player(-math.inf, math.inf, 0)[1]
 
-   def make_move(self, action, player):
-      self.board[action // self.size][action % self.size] = player
-
+   # điều kiện hoà là phải không có ô trống nào và không có ai thắng
    def is_draw(self):
       return not any(' ' in row for row in self.board) and self.util.calculate_winner() == None
 
+   # cái này để test trong hàm main
+'''
+   def make_move(self, action, player):
+      self.board[action // self.size][action % self.size] = player
+   
    def render(self):
         for i in range(self.size):
             for j in range(self.size):
@@ -133,6 +170,7 @@ class Game:
                     print(".", end=" ")
             print()
         print()
+
 
 if __name__ == "__main__":
    arr = ['x', 'x', 'x', ' ', ' ', ' ', ' ']
@@ -170,10 +208,11 @@ if __name__ == "__main__":
                 ]
    size = 15
    game = Game(board, size)
+   print(game.actions())
    # print(game.actions())
    # print(game.board)
    # print(game.utility())
-   # game.result(80, 'x')
+   # game.temp_board_utility(80, 'x')
    # print(game.board)
    # print(game.utility())
    # game.back(80)
@@ -182,7 +221,7 @@ if __name__ == "__main__":
    # while game.util.calculate_winner() == None:
    #    game.render()
    #    print("bot is thinking")
-   #    move = game.move('o')
+   #    move = game.move()
    #    print(move)
    #    game.make_move(move, 'x')
    #    game.render()
@@ -195,3 +234,5 @@ if __name__ == "__main__":
    #    y = int(input())
    #    game.make_move(x * size + y, 'o')
    #    game.render()
+
+'''

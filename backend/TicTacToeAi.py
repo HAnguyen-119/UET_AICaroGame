@@ -4,9 +4,8 @@ import math
 
 from Game import Game
 
+# này mà còn không hiểu nữa thì chịu rồi
 def get_move(board, size):
-   count_x, count_y = count(board, size)
-   player = X if count_x == count_y else Y
    game = Game(board, size)
 
    row, col = divmod(game.move(), size)
