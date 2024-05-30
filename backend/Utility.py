@@ -16,15 +16,11 @@ class Utility:
    
    def calculate_lines(self, n):
       res = []
-      #row
+      #row & col
       for i in range(self.size):
          for j in range(self.size - n + 1):
             row = [[i, j + k] for k in range(n)]
             res.append(row)
-      
-      #col
-      for i in range(self.size):
-         for j in range(self.size - n + 1):
             col = [[j + k, i] for k in range(n)]
             res.append(col)
       
