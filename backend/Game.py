@@ -64,7 +64,8 @@ class Game:
       if winner != None:
          return math.inf if winner[0] == 'x' else -math.inf
       else:
-         two, blt, brt, thr, fou, stf = self.util.two(), self.util.block_three(), self.util.broken_three(), self.util.straight_three(), self.util.four(), self.util.straight_four()
+         stf, fou, brt, blt = self.util.six_utility()
+         thr, two = self.util.five_utility()
          return 500 * (two[0] - two[1]) + 2000 * (blt[0] - blt[1]) + 15000 * (brt[0] - brt[1]) + 30000 * (thr[0] - thr[1]) + 500000 * (fou[0] - fou[1]) + 20000000 * (stf[0] - stf[1])
 
    def terminal(self):
@@ -112,10 +113,10 @@ class Game:
 
       return v
    
-   def ai_move(self):
+   def move(self, player):
       return self.min_player(-math.inf, math.inf, 0)[1]
 
-   def move(self, action, player):
+   def make_move(self, action, player):
       self.board[action // self.size][action % self.size] = player
 
    def is_draw(self):
@@ -132,7 +133,6 @@ class Game:
                     print(".", end=" ")
             print()
         print()
-
 
 if __name__ == "__main__":
    arr = ['x', 'x', 'x', ' ', ' ', ' ', ' ']
@@ -169,8 +169,8 @@ if __name__ == "__main__":
                 ['x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x'] 
                 ]
    size = 15
-   game = Game(test_draw, size)
-   print(game.actions())
+   game = Game(board, size)
+   # print(game.actions())
    # print(game.board)
    # print(game.utility())
    # game.result(80, 'x')
@@ -182,12 +182,16 @@ if __name__ == "__main__":
    # while game.util.calculate_winner() == None:
    #    game.render()
    #    print("bot is thinking")
-   #    move = game.ai_move()
+   #    move = game.move('o')
    #    print(move)
-   #    game.move(move, 'x')
+   #    game.make_move(move, 'x')
    #    game.render()
+
+   #    if game.util.calculate_winner() != None:
+   #       break
+
    #    print('your turn: ')
    #    x = int(input())
    #    y = int(input())
-   #    game.move(x * self.size + y, 'o')
+   #    game.make_move(x * size + y, 'o')
    #    game.render()
