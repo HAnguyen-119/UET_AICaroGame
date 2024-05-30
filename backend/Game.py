@@ -47,7 +47,7 @@ class Game:
 
                      # lưu lại vị trí để tính xem có hợp lệ hay không
                      new_index = index + row + col
-                     if new_index >= 0 and new_index < 225 and self.board[new_index // self.size][new_index % self.size] != ' ':
+                     if new_index >= 0 and new_index < self.size * self.size and self.board[new_index // self.size][new_index % self.size] != ' ':
                         res.append(index)
                         found = True
                         break
@@ -97,6 +97,8 @@ class Game:
          stf, fou, brt, blt = self.util.six_utility()
          thr, two = self.util.five_utility()
          return 500 * (two[0] - two[1]) + 2000 * (blt[0] - blt[1]) + 15000 * (brt[0] - brt[1]) + 30000 * (thr[0] - thr[1]) + 500000 * (fou[0] - fou[1]) + 20000000 * (stf[0] - stf[1])
+         # thr, two, brf = self.util.five_utility()
+         # return 500 * (two[0] - two[1]) + 2000 * (blt[0] - blt[1]) + 15000 * (brt[0] - brt[1]) + 30000 * (thr[0] - thr[1]) + 500000 * (fou[0] - fou[1]) + 5000000 * (brf[0] - brf[1]) + 20000000 * (stf[0] - stf[1])
 
    # điều kiện dừng của minimax
    def terminal(self):
@@ -109,7 +111,7 @@ class Game:
       if self.terminal() or depth > 3:
          return [self.utility(), None]
       board_hash, cur_acts = self.zobrist.hash(self.board, self.size, self.RANDTAB), self.actions()
-      val = [alpha, cur_acts[0] if len(cur_acts) > 0 else 112] 
+      val = [alpha, cur_acts[0] if len(cur_acts) > 0 else self.get_random_move()] 
       if board_hash in self.TRANSPOS_TAB:
          return [alpha, self.TRANSPOS_TAB[self.TRANSPOS_TAB.index(board_hash)]]
       
@@ -130,7 +132,7 @@ class Game:
          return [self.utility(), None]
       
       board_hash, cur_acts = self.zobrist.hash(self.board, self.size, self.RANDTAB), self.actions()
-      val = [beta, cur_acts[0] if len(cur_acts) > 0 else 112]
+      val = [beta, cur_acts[0] if len(cur_acts) > 0 else self.get_random_move()]
       if board_hash in self.TRANSPOS_TAB:
          return [beta, self.TRANSPOS_TAB[self.TRANSPOS_TAB.index(board_hash)]]
       
@@ -146,6 +148,10 @@ class Game:
 
       return val
    
+   # random
+   def get_random_move(self):
+      return random.randint(0, self.size * self.size - 1)
+
    # tạo nước đi, dùng min player hay max player cũng được
    def move(self):
       return self.min_player(-math.inf, math.inf, 0)[1]
@@ -155,7 +161,7 @@ class Game:
       return not any(' ' in row for row in self.board) and self.util.calculate_winner() == None
 
    # cái này để test trong hàm main
-'''
+
    def make_move(self, action, player):
       self.board[action // self.size][action % self.size] = player
    
@@ -174,21 +180,19 @@ class Game:
 
 if __name__ == "__main__":
    arr = ['x', 'x', 'x', ' ', ' ', ' ', ' ']
-   board = [[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', 'x', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', ' ', 'x', 'x', 'x', 'x', 'o', ' ', ' ', ' ', ' '], 
-            [' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', 'o', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', ' ', 'o', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
-            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+   board = [[' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
             ]
    test_draw = [['x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x'], 
                 ['o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o'], 
@@ -206,9 +210,9 @@ if __name__ == "__main__":
                 ['o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o'], 
                 ['x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x', 'o', 'x'] 
                 ]
-   size = 15
+   size = 13
    game = Game(board, size)
-   print(game.actions())
+   # print(game.actions())
    # print(game.actions())
    # print(game.board)
    # print(game.utility())
@@ -218,21 +222,20 @@ if __name__ == "__main__":
    # game.back(80)
    # print(game.board)
    # print(game.utility())
-   # while game.util.calculate_winner() == None:
-   #    game.render()
-   #    print("bot is thinking")
-   #    move = game.move()
-   #    print(move)
-   #    game.make_move(move, 'x')
-   #    game.render()
+   while game.util.calculate_winner() == None:
+      game.render()
+      print("bot is thinking")
+      move = game.move()
+      print(move)
+      game.make_move(move, 'x')
+      game.render()
 
-   #    if game.util.calculate_winner() != None:
-   #       break
+      if game.util.calculate_winner() != None:
+         break
 
-   #    print('your turn: ')
-   #    x = int(input())
-   #    y = int(input())
-   #    game.make_move(x * size + y, 'o')
-   #    game.render()
+      print('your turn: ')
+      x = int(input())
+      y = int(input())
+      game.make_move(x * size + y, 'o')
+      game.render()
 
-'''
