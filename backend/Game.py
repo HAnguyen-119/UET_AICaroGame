@@ -2,7 +2,7 @@ import math
 import random
 import heapq
 
-from Utility import Utility
+from tmp_utility import Utility
 from Zobrist import Zobrist
 
 WIN_SIZE = 5
@@ -95,8 +95,8 @@ class Game:
          return math.inf if winner[0] == 'x' else -math.inf
       else:
          stf, fou, brt, blt = self.util.six_utility()
-         thr, two = self.util.five_utility()
-         return 500 * (two[0] - two[1]) + 2000 * (blt[0] - blt[1]) + 15000 * (brt[0] - brt[1]) + 30000 * (thr[0] - thr[1]) + 500000 * (fou[0] - fou[1]) + 20000000 * (stf[0] - stf[1])
+         thr, thf, two = self.util.five_utility()
+         return 500 * (two[0] - two[1]) + 2000 * (blt[0] - blt[1]) + 15000 * (brt[0] - brt[1]) + 30000 * (thf[0] - thf[1]) + 100000 * (thr[0] - thr[1]) + 500000 * (fou[0] - fou[1]) + 20000000 * (stf[0] - stf[1])
          # thr, two, brf = self.util.five_utility()
          # return 500 * (two[0] - two[1]) + 2000 * (blt[0] - blt[1]) + 15000 * (brt[0] - brt[1]) + 30000 * (thr[0] - thr[1]) + 500000 * (fou[0] - fou[1]) + 5000000 * (brf[0] - brf[1]) + 20000000 * (stf[0] - stf[1])
 
@@ -232,8 +232,8 @@ if __name__ == "__main__":
          break
 
       print('your turn: ')
-      x = int(input())
-      y = int(input())
-      game.make_move(x * size + y, 'o')
+      move2 = game.move()
+      print(move2)
+      game.make_move(move2, 'o')
       game.render()
 
